@@ -45,13 +45,9 @@ func (c *Config) Vault() *cfg.VaultConfig {
 	return c.Secrets
 }
 
-```
-
-
-```
 func main() {
 	// Parse the configuration
-	cfg, err := config.ReadOrCreate("emitter", "config.json", config.NewDefault, config.NewEnvironmentProvider(), config.NewVaultProvider("app"))
+	cfg, err := config.ReadOrCreate("emitter", "config.json", NewDefault, config.NewEnvironmentProvider(), config.NewVaultProvider("app"))
 	if err != nil {
 		panic("Unable to parse configuration, due to " + err.Error())
 	}
