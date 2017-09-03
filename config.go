@@ -213,6 +213,7 @@ func createDefault(path string, newDefault func() Config) (Config, error) {
 
 // ReadOrCreate reads or creates the configuration object.
 func ReadOrCreate(prefix string, path string, newDefault func() Config, stores ...SecretStore) (cfg Config, err error) {
+	cfg = newDefault()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		// Create a configuration and write it to a file
 		if cfg, err = createDefault(path, newDefault); err != nil {
