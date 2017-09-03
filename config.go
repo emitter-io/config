@@ -56,8 +56,8 @@ func (c *TLSConfig) Load() tls.Certificate {
 	}
 
 	// Make sure the paths are absolute, otherwise we won't be able to read the files.
-	c.Certificate, _ = filepath.Abs(c.Certificate)
-	c.PrivateKey, _ = filepath.Abs(c.PrivateKey)
+	c.Certificate = resolvePath(c.Certificate)
+	c.PrivateKey = resolvePath(c.PrivateKey)
 
 	// Load the certificate from the cert/key files.
 	cert, err := tls.LoadX509KeyPair(c.Certificate, c.PrivateKey)
@@ -116,7 +116,7 @@ func (c *ProviderConfig) Load(builtins ...Provider) (Provider, error) {
 	}
 
 	// Attempt to load a plugin provider
-	p, err := plugin.Open(c.PluginPath)
+	p, err := plugin.Open(resolvePath(c.PluginPath))
 	if err != nil {
 		return nil, errors.New("The provider plugin path '" + c.PluginPath + "' could not be opened")
 	}
@@ -280,4 +280,22 @@ func declassifyRecursive(prefix string, provider SecretStore, value reflect.Valu
 
 func getFieldName(f reflect.StructField) string {
 	return strings.Replace(string(f.Tag.Get("json")), ",omitempty", "", -1)
+}
+
+func resolvePath(path string) string {
+
+	// If it's an url, download the file
+	if strings.HasPrefix(path, "http") {
+		f, err := httpFile(path)
+		if err != nil {
+			panic(err)
+		}
+
+		// Get the downloaded file path
+		path = f.Name()
+	}
+
+	// Make sure the path is absolute
+	path, _ = filepath.Abs(path)
+	return path
 }
