@@ -274,6 +274,16 @@ func declassifyRecursive(prefix string, provider SecretStore, value reflect.Valu
 		if v, ok := provider.GetSecret(prefix); ok {
 			value.SetString(v)
 		}
+
+	// This is a map, unmarshal and set
+	case reflect.Map:
+		if v, ok := provider.GetSecret(prefix); ok {
+			println(v)
+			var out map[string]interface{}
+			if err := json.Unmarshal([]byte(v), &out); err == nil {
+				value.Set(reflect.ValueOf(out))
+			}
+		}
 	}
 }
 

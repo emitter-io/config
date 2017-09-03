@@ -9,8 +9,9 @@ import (
 )
 
 type testConfig struct {
-	Name     string       `json:"name"`
-	VaultCfg *VaultConfig `json:"vault,omitempty"`
+	Name     string          `json:"name"`
+	VaultCfg *VaultConfig    `json:"vault,omitempty"`
+	Provider *ProviderConfig `json:"provider,omitempty"`
 }
 
 func (c *testConfig) Vault() *VaultConfig {
@@ -63,4 +64,30 @@ func Test_declassify(t *testing.T) {
 	c.Vault().Application = "abc"
 	assert.True(t, c.Vault() != nil)
 	assert.True(t, c.Vault().Application == "abc")
+}
+
+func Test_declassify_Map(t *testing.T) {
+	c := new(testConfig)
+	c.Name = "test"
+	c.VaultCfg = new(VaultConfig)
+	c.Provider = &ProviderConfig{Provider: "testprovider"}
+
+	subconf := `{
+		"type": "service_account",
+		"project_id": "emitter-io",
+		"private_key_id": "ABECESGSEGSEGSEG",
+		"client_email": "EG#EFSD16546@appspot.gserviceaccount.com",
+		"client_id": "65498913215443546542211557",
+		"auth_uri": "https://accounts.google.com/o/oauth2/auth",
+		"token_uri": "https://accounts.google.com/o/oauth2/token",
+		"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+		"client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/emitter-io%40appspot.gserviceaccount.com"}`
+
+	m := new(secretStoreMock)
+	m.On("GetSecret", "emitter/provider/config").Return(subconf)
+	m.On("GetSecret", mock.Anything).Return("")
+
+	declassify(c, "emitter", m)
+
+	assert.Equal(t, "65498913215443546542211557", c.Provider.Config["client_id"])
 }
