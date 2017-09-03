@@ -26,7 +26,7 @@ func TestUnmarshalJSON(t *testing.T) {
 	}
 
 	var actual map[string]interface{}
-	err := UnmarshalJSON(bytes.NewReader([]byte(input)), &actual)
+	err := unmarshalJSON(bytes.NewReader([]byte(input)), &actual)
 	if err != nil {
 		fmt.Printf("decoding err: %v\n", err)
 	}
@@ -49,14 +49,14 @@ func TestPostGet(t *testing.T) {
 
 	{
 		output := new(testObject)
-		err := Post(s.URL, body, output)
+		err := httpPost(s.URL, body, output)
 		assert.NoError(t, err)
 		assert.EqualValues(t, expect, output)
 	}
 
 	{
 		output := new(testObject)
-		err := Get(s.URL, output)
+		err := httpGet(s.URL, output)
 		assert.NoError(t, err)
 		assert.EqualValues(t, expect, output)
 	}

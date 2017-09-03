@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net"
 	"time"
-
-	"github.com/emitter-io/emitter/network/http"
 )
 
 // VaultClient represents a lightweight vault client.
@@ -86,14 +84,14 @@ func (c *VaultClient) ReadCredentials(credentialsName string) (*AwsCredentials, 
 
 // Get issues an HTTP GET to a vault server.
 func (c *VaultClient) get(url string) (output *vaultSecret, err error) {
-	var headers []http.HeaderValue
+	var headers []httpHeader
 	if c.IsAuthenticated() {
-		headers = append(headers, http.NewHeader("X-Vault-Token", c.token))
+		headers = append(headers, newHttpHeader("X-Vault-Token", c.token))
 	}
 
 	// Issue the HTTP Get
 	output = new(vaultSecret)
-	err = http.Get(c.address+"/v1"+url, output, headers...)
+	err = httpGet(c.address+"/v1"+url, output, headers...)
 	return
 }
 
@@ -102,9 +100,9 @@ func (c *VaultClient) post(url string, body interface{}) (output *vaultSecret, e
 
 	// Note: The HTTP post is used for authentication only right now, hence no need
 	// to add the X-Vault-Token.
-	var headers []http.HeaderValue
+	var headers []httpHeader
 	output = new(vaultSecret)
-	err = http.Post(c.address+"/v1"+url, body, output, headers...)
+	err = httpPost(c.address+"/v1"+url, body, output, headers...)
 	return
 }
 

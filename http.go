@@ -14,19 +14,19 @@ var defaultClient = &http.Client{
 	Timeout: 5 * time.Second,
 }
 
-// HeaderValue represents a header with a value attached.
-type HeaderValue struct {
+// httpHeader represents a header with a value attached.
+type httpHeader struct {
 	Header string
 	Value  string
 }
 
-// NewHeader builds an HTTP header with a value.
-func NewHeader(header, value string) HeaderValue {
-	return HeaderValue{Header: header, Value: value}
+// newHttpHeader builds an HTTP header with a value.
+func newHttpHeader(header, value string) httpHeader {
+	return httpHeader{Header: header, Value: value}
 }
 
-// Get is a utility function which issues an HTTP Get on a specified URL. The encoding is JSON.
-var Get = func(url string, output interface{}, headers ...HeaderValue) error {
+// httpGet is a utility function which issues an HTTP httpGet on a specified URL. The encoding is JSON.
+var httpGet = func(url string, output interface{}, headers ...httpHeader) error {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
@@ -43,12 +43,12 @@ var Get = func(url string, output interface{}, headers ...HeaderValue) error {
 		return err
 	}
 
-	return UnmarshalJSON(resp.Body, output)
+	return unmarshalJSON(resp.Body, output)
 }
 
-// Post is a utility function which marshals and issues an HTTP post on a specified URL. The
+// httpPost is a utility function which marshals and issues an HTTP post on a specified URL. The
 // encoding is JSON.
-var Post = func(url string, body interface{}, output interface{}, headers ...HeaderValue) error {
+var httpPost = func(url string, body interface{}, output interface{}, headers ...httpHeader) error {
 	b, err := json.Marshal(body)
 	if err != nil {
 		return err
@@ -71,11 +71,11 @@ var Post = func(url string, body interface{}, output interface{}, headers ...Hea
 		return err
 	}
 
-	return UnmarshalJSON(resp.Body, output)
+	return unmarshalJSON(resp.Body, output)
 }
 
-// UnmarshalJSON unmarshals the given io.Reader pointing to a JSON, into a desired object
-var UnmarshalJSON = func(r io.Reader, out interface{}) error {
+// unmarshalJSON unmarshals the given io.Reader pointing to a JSON, into a desired object
+var unmarshalJSON = func(r io.Reader, out interface{}) error {
 	if r == nil {
 		return errors.New("'io.Reader' being decoded is nil")
 	}
