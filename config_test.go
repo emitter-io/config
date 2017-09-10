@@ -9,9 +9,9 @@ import (
 )
 
 type testConfig struct {
-	Name     string          `json:"name"`
-	VaultCfg *VaultConfig    `json:"vault,omitempty"`
-	Provider *ProviderConfig `json:"provider,omitempty"`
+	Name     string           `json:"name"`
+	VaultCfg *VaultConfig     `json:"vault,omitempty"`
+	Provider *ProviderConfig  `json:"provider,omitempty"`
 }
 
 func (c *testConfig) Vault() *VaultConfig {
@@ -69,8 +69,6 @@ func Test_declassify(t *testing.T) {
 func Test_declassify_Map(t *testing.T) {
 	c := new(testConfig)
 	c.Name = "test"
-	c.VaultCfg = new(VaultConfig)
-	c.Provider = &ProviderConfig{Provider: "testprovider"}
 
 	subconf := `{
 		"type": "service_account",
