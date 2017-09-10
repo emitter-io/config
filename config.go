@@ -168,7 +168,7 @@ type ClusterConfig struct {
 // specified, but the provider was not found or not able to configure. This uses the first
 // provider as a default value.
 func LoadProvider(config *ProviderConfig, providers ...Provider) Provider {
-	if config == nil {
+	if config == nil || config.Provider == "" {
 		return providers[0]
 	}
 
