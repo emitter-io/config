@@ -40,7 +40,11 @@ type TLSConfig struct {
 }
 
 // Load loads a certificate from the configuration.
-func (c *TLSConfig) Load() tls.Certificate {
+func (c *TLSConfig) Load() (tls.Certificate, error) {
+	if c.Certificate == "" || c.PrivateKey == ""{
+		return tls.Certificate{}, errors.New("No certificate or private key configured")
+	}
+
 	// If the certificate provided is in plain text, write to file so we can read it.
 	if strings.HasPrefix(c.Certificate, "---") {
 		if err := ioutil.WriteFile("broker.crt", []byte(c.Certificate), os.ModePerm); err == nil {
@@ -60,11 +64,7 @@ func (c *TLSConfig) Load() tls.Certificate {
 	c.PrivateKey = resolvePath(c.PrivateKey)
 
 	// Load the certificate from the cert/key files.
-	cert, err := tls.LoadX509KeyPair(c.Certificate, c.PrivateKey)
-	if err != nil {
-		panic(err)
-	}
-	return cert
+	return tls.LoadX509KeyPair(c.Certificate, c.PrivateKey)
 }
 
 // VaultConfig represents Vault configuration.
