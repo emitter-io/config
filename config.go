@@ -34,14 +34,15 @@ type Config interface {
 
 // TLSConfig represents TLS listener configuration.
 type TLSConfig struct {
-	ListenAddr  string `json:"listen"`      // The address to listen on.
-	Certificate string `json:"certificate"` // The certificate request.
-	PrivateKey  string `json:"private"`     // The private key for the certificate.
+	ListenAddr  string   `json:"listen"`                // The address to listen on.
+	Certificate string   `json:"certificate,omitempty"` // The certificate request.
+	PrivateKey  string   `json:"private,omitempty"`     // The private key for the certificate.
+	Hosts       []string `json:"hosts,omitempty"`       // The list of hosts to whitelist.
 }
 
 // Load loads a certificate from the configuration.
 func (c *TLSConfig) Load() (tls.Certificate, error) {
-	if c.Certificate == "" || c.PrivateKey == ""{
+	if c.Certificate == "" || c.PrivateKey == "" {
 		return tls.Certificate{}, errors.New("No certificate or private key configured")
 	}
 
@@ -141,29 +142,6 @@ func (c *ProviderConfig) Load(builtins ...Provider) (Provider, error) {
 	return provider, nil
 }
 
-// ClusterConfig represents the configuration for the cluster.
-type ClusterConfig struct {
-
-	// The name of this node. This must be unique in the cluster. If this is not set, Emitter
-	// will set it to the external IP address of the running machine.
-	NodeName string `json:"name,omitempty"`
-
-	// The IP address and port that is used to bind the inter-node communication network. This
-	// is used for the actual binding of the port.
-	ListenAddr string `json:"listen"`
-
-	// The address and port to advertise inter-node communication network. This is used for nat
-	// traversal.
-	AdvertiseAddr string `json:"advertise"`
-
-	// The seed address (or a domain name) for cluster join.
-	Seed string `json:"seed"`
-
-	// Passphrase is used to initialize the primary encryption key in a keyring. This key
-	// is used for encrypting all the gossip messages (message-level encryption).
-	Passphrase string `json:"passphrase,omitempty"`
-}
-
 // LoadProvider loads a provider from the configuration or panics if the configuration is
 // specified, but the provider was not found or not able to configure. This uses the first
 // provider as a default value.
@@ -250,13 +228,13 @@ func declassify(config interface{}, prefix string, provider SecretStore) {
 func declassifyRecursive(prefix string, provider SecretStore, value reflect.Value) {
 	switch value.Kind() {
 	case reflect.Ptr:
-		pValue := value.Elem() 
+		pValue := value.Elem()
 		if !pValue.IsValid() {
 			// Create a new struct and set the value
 			pValue = reflect.New(value.Type().Elem())
 			value.Set(pValue)
 		}
-		
+
 		declassifyRecursive(prefix, provider, pValue)
 
 	// If it is a struct we translate each field

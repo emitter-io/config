@@ -1,12 +1,10 @@
 package config
 
 import (
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	http2 "github.com/emitter-io/emitter/network/http"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,21 +46,6 @@ func Test_newVaultClient(t *testing.T) {
 		cli := NewVaultClient(tc.addr)
 		assert.NotNil(t, cli)
 	}
-}
-
-func TestVaultAuthenticate(t *testing.T) {
-	oldGet := http2.Get
-	defer func() {
-		http2.Get = oldGet
-	}()
-
-	http2.Get = func(url string, output interface{}, headers ...http2.HeaderValue) error {
-		return errors.New("err")
-	}
-
-	cli := NewVaultClient("127.0.0.1")
-	err := cli.Authenticate("x", "y")
-	assert.Error(t, err)
 }
 
 func TestVaultClient(t *testing.T) {

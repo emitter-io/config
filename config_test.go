@@ -9,9 +9,9 @@ import (
 )
 
 type testConfig struct {
-	Name     string           `json:"name"`
-	VaultCfg *VaultConfig     `json:"vault,omitempty"`
-	Provider *ProviderConfig  `json:"provider,omitempty"`
+	Name     string          `json:"name"`
+	VaultCfg *VaultConfig    `json:"vault,omitempty"`
+	Provider *ProviderConfig `json:"provider,omitempty"`
 }
 
 func (c *testConfig) Vault() *VaultConfig {
@@ -56,6 +56,7 @@ func Test_declassify(t *testing.T) {
 	expected.Name = "test"
 	expected.VaultCfg = new(VaultConfig)
 	expected.VaultCfg.Address = "hello"
+	expected.Provider = new(ProviderConfig)
 
 	declassify(c, "emitter", m)
 
