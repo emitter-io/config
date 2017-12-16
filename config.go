@@ -13,6 +13,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"golang.org/x/crypto/acme/autocert"
 )
 
 // SecretStore represents a contract for a store capable of resolving secrets.
@@ -34,38 +36,28 @@ type Config interface {
 
 // TLSConfig represents TLS listener configuration.
 type TLSConfig struct {
-	ListenAddr  string   `json:"listen"`                // The address to listen on.
-	Certificate string   `json:"certificate,omitempty"` // The certificate request.
-	PrivateKey  string   `json:"private,omitempty"`     // The private key for the certificate.
-	Hosts       []string `json:"hosts,omitempty"`       // The list of hosts to whitelist.
+	ListenAddr string   `json:"listen"`          // The address to listen on.
+	Hosts      []string `json:"hosts"`           // The list of hosts to whitelist.
+	Email      string   `json:"email,omitempty"` // The email address for autocert.
 }
 
-// Load loads a certificate from the configuration.
-func (c *TLSConfig) Load() (tls.Certificate, error) {
-	if c.Certificate == "" || c.PrivateKey == "" {
-		return tls.Certificate{}, errors.New("No certificate or private key configured")
+// Load loads the certificates from the cache or the configuration.
+func (c *TLSConfig) Load(certCache autocert.Cache) (*tls.Config, error) {
+	if len(c.Hosts) == 0 {
+		return nil, errors.New("unable to request a certificate, no host names were configured")
 	}
 
-	// If the certificate provided is in plain text, write to file so we can read it.
-	if strings.HasPrefix(c.Certificate, "---") {
-		if err := ioutil.WriteFile("broker.crt", []byte(c.Certificate), os.ModePerm); err == nil {
-			c.Certificate = "broker.crt"
-		}
+	// Create an auto-cert manager
+	certManager := autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist(c.Hosts...),
+		Email:      c.Email,
+		Cache:      certCache,
 	}
 
-	// If the private key provided is in plain text, write to file so we can read it.
-	if strings.HasPrefix(c.PrivateKey, "---") {
-		if err := ioutil.WriteFile("broker.key", []byte(c.PrivateKey), os.ModePerm); err == nil {
-			c.PrivateKey = "broker.key"
-		}
-	}
-
-	// Make sure the paths are absolute, otherwise we won't be able to read the files.
-	c.Certificate = resolvePath(c.Certificate)
-	c.PrivateKey = resolvePath(c.PrivateKey)
-
-	// Load the certificate from the cert/key files.
-	return tls.LoadX509KeyPair(c.Certificate, c.PrivateKey)
+	return &tls.Config{
+		GetCertificate: certManager.GetCertificate,
+	}, nil
 }
 
 // VaultConfig represents Vault configuration.
