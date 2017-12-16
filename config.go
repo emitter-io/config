@@ -23,6 +23,11 @@ type SecretStore interface {
 	GetSecret(secretName string) (string, bool)
 }
 
+// CertificateStore represents a secret store which can be used for certificates.
+type CertificateStore interface {
+	autocert.Cache
+}
+
 // Provider represents a configurable provider.
 type Provider interface {
 	Name() string
@@ -36,21 +41,26 @@ type Config interface {
 
 // TLSConfig represents TLS listener configuration.
 type TLSConfig struct {
-	ListenAddr string   `json:"listen"`          // The address to listen on.
-	Hosts      []string `json:"hosts"`           // The list of hosts to whitelist.
-	Email      string   `json:"email,omitempty"` // The email address for autocert.
+	ListenAddr string `json:"listen"`          // The address to listen on.
+	Host       string `json:"host"`            // The hostname to whitelist.
+	Email      string `json:"email,omitempty"` // The email address for autocert.
 }
 
 // Load loads the certificates from the cache or the configuration.
 func (c *TLSConfig) Load(certCache autocert.Cache) (*tls.Config, error) {
-	if len(c.Hosts) == 0 {
-		return nil, errors.New("unable to request a certificate, no host names were configured")
+	if c.Host == "" {
+		return nil, errors.New("unable to request a certificate, no host name configured")
+	}
+
+	// Default to disk cache
+	if certCache == nil {
+		certCache = autocert.DirCache("certs")
 	}
 
 	// Create an auto-cert manager
 	certManager := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(c.Hosts...),
+		HostPolicy: autocert.HostWhitelist(c.Host),
 		Email:      c.Email,
 		Cache:      certCache,
 	}
@@ -64,6 +74,17 @@ func (c *TLSConfig) Load(certCache autocert.Cache) (*tls.Config, error) {
 type VaultConfig struct {
 	Address     string `json:"address"` // The vault address to use.
 	Application string `json:"app"`     // The vault application ID to use.
+}
+
+// NewClient creates a new vault client for the configuration.
+func (c *VaultConfig) NewClient(user string) (client *VaultClient, err error) {
+	if c.Address == "" || c.Application == "" {
+		return nil, errors.New("unable to configure Vault provider")
+	}
+
+	client = NewVaultClient(c.Address)
+	err = client.Authenticate(c.Application, user)
+	return
 }
 
 // ProviderConfig represents provider configuration.

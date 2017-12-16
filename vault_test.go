@@ -76,23 +76,4 @@ func TestVaultClient(t *testing.T) {
 		}
 	}
 
-	// Test few different credentials endpoints
-	credentialTests := []struct {
-		key string
-		err bool
-	}{
-		{key: "storage-emitter"},
-		{key: "err1", err: true},
-		{key: "err2", err: true},
-	}
-
-	for _, tc := range credentialTests {
-		v, err := cli.ReadCredentials(tc.key)
-		assert.Equal(t, tc.err, err != nil)
-		if !tc.err {
-			assert.Equal(t, "access", v.AccessKey)
-			assert.Equal(t, "secret", v.SecretKey)
-			assert.Equal(t, "token", v.Token)
-		}
-	}
 }

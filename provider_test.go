@@ -48,3 +48,17 @@ func TestVaultProvider(t *testing.T) {
 	assert.True(t, ok)
 
 }
+
+func TestVaultCache(t *testing.T) {
+	s := httptest.NewServer(&testVaultHandler{})
+	defer s.Close()
+
+	cfg := new(testConfig)
+	cfg.VaultCfg = &VaultConfig{
+		Address:     s.URL,
+		Application: "app",
+	}
+	cache, err := NewVaultCache("3497f684e809", cfg)
+	assert.NotNil(t, cache)
+	assert.NoError(t, err)
+}
