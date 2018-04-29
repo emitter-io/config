@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "GcIrB1ug6mS8aG73v1KtlHfva9Q=",
+			"checksumSHA1": "aENNVxKxF9h9PfvTIstiAS5I3Lg=",
 			"path": "github.com/davecgh/go-spew/spew",
-			"revision": "a476722483882dd40b8111f0eb64e1d7f43f56e4",
-			"revisionTime": "2017-08-29T19:49:58Z"
+			"revision": "8991bc29aa16c548c550c7ff78260e27b9ab7c73",
+			"revisionTime": "2018-02-21T22:46:20Z"
 		},
 		{
 			"checksumSHA1": "R3yk3OJzuq4MVfVGX5AhkkYv1ko=",
@@ -15,34 +15,34 @@
 			"revisionTime": "2016-01-10T10:55:54Z"
 		},
 		{
-			"checksumSHA1": "ofNmmhhJAxYL1Mh09iq+utdfHIM=",
+			"checksumSHA1": "OGMbdNqR/culumwwltR88pImhqA=",
 			"path": "github.com/stretchr/objx",
-			"revision": "1a9d0bb9f541897e62256577b352fdbc1fb4fd94",
-			"revisionTime": "2015-09-28T12:21:52Z"
+			"revision": "a5cfa15c000af5f09784e5355969ba7eb66ef0de",
+			"revisionTime": "2018-04-26T10:50:06Z"
 		},
 		{
-			"checksumSHA1": "5YCFabYzA1Zv/nGy35VDX5WBP4E=",
+			"checksumSHA1": "8DKPX27DIn9aJlrtK2SBdxlynno=",
 			"path": "github.com/stretchr/testify/assert",
-			"revision": "890a5c3458b43e6104ff5da8dfa139d013d77544",
-			"revisionTime": "2017-07-05T02:17:15Z"
+			"revision": "c679ae2cc0cb27ec3293fea7e254e47386f05d69",
+			"revisionTime": "2018-03-14T08:05:35Z"
 		},
 		{
-			"checksumSHA1": "q+MPhXUlpfmP5UgmOySPeldXwvs=",
+			"checksumSHA1": "6J3IG7MPP44XuLCu0+m2XxwnSXE=",
 			"path": "github.com/stretchr/testify/mock",
-			"revision": "890a5c3458b43e6104ff5da8dfa139d013d77544",
-			"revisionTime": "2017-07-05T02:17:15Z"
+			"revision": "c679ae2cc0cb27ec3293fea7e254e47386f05d69",
+			"revisionTime": "2018-03-14T08:05:35Z"
 		},
 		{
-			"checksumSHA1": "CSMVjFF7FnylAUUKW1e/4r+VFXA=",
+			"checksumSHA1": "zHLlCNnnX/KNVue2tHr+FWxbszA=",
 			"path": "golang.org/x/crypto/acme",
-			"revision": "94eea52f7b742c7cbe0b03b22f0c4c8631ece122",
-			"revisionTime": "2017-11-28T01:43:40Z"
+			"revision": "b49d69b5da943f7ef3c9cf91c8777c1f78a0cc3c",
+			"revisionTime": "2018-04-25T14:55:48Z"
 		},
 		{
-			"checksumSHA1": "4JU5m5FGcmRYDq/oPlwQC+K8TYA=",
+			"checksumSHA1": "6NdRp9OYL38e71vEtcQtSkN/ZbA=",
 			"path": "golang.org/x/crypto/acme/autocert",
-			"revision": "94eea52f7b742c7cbe0b03b22f0c4c8631ece122",
-			"revisionTime": "2017-11-28T01:43:40Z"
+			"revision": "b49d69b5da943f7ef3c9cf91c8777c1f78a0cc3c",
+			"revisionTime": "2018-04-25T14:55:48Z"
 		}
 	],
 	"rootPath": "github.com/emitter-io/config"
