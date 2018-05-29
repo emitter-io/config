@@ -9,9 +9,10 @@ import (
 )
 
 type testConfig struct {
-	Name     string          `json:"name"`
-	VaultCfg *VaultConfig    `json:"vault,omitempty"`
-	Provider *ProviderConfig `json:"provider,omitempty"`
+	Name       string          `json:"name"`
+	VaultCfg   *VaultConfig    `json:"vault,omitempty"`
+	Provider   *ProviderConfig `json:"provider,omitempty"`
+	unexported *ProviderConfig
 }
 
 func (c *testConfig) Vault() *VaultConfig {
