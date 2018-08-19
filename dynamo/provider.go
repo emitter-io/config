@@ -39,7 +39,7 @@ func (p *Provider) Configure(config map[string]interface{}) (err error) {
 
 	// Get AWS Table Name
 	table := get(config, "table", "")
-	if region == "" {
+	if table == "" {
 		return errors.New(prefix + ", no Table Name was specified")
 	}
 

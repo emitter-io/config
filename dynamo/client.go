@@ -4,6 +4,8 @@
 package dynamo
 
 import (
+	"errors"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -63,7 +65,8 @@ func (c *client) Get(key string) (string, error) {
 	if v, ok := result.Item[c.valColumn]; ok && v.S != nil {
 		return *v.S, nil
 	}
-	return "", nil
+
+	return "", errors.New("key was not found in dynamodb")
 }
 
 // Delete removes a value.
