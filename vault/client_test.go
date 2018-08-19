@@ -1,4 +1,7 @@
-package config
+// Copyright (c) Roman Atachiants and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+
+package vault
 
 import (
 	"net/http"
@@ -7,6 +10,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
+
+type testConfig struct {
+	Name     string                 `json:"name"`
+	VaultCfg map[string]interface{} `json:"vault,omitempty"`
+}
 
 type testVaultHandler struct{}
 
@@ -27,6 +35,8 @@ func (h *testVaultHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		response = `err`
 	case "/v1/aws/sts/err2":
 		response = `{ }`
+	case "/v1/secret/certs/abc":
+		response = `{ "data": {"value": "c2VjcmV0IGNlcnRpZmljYXRl" } }`
 	}
 
 	w.Write([]byte(response))
@@ -43,7 +53,7 @@ func Test_newVaultClient(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		cli := NewVaultClient(tc.addr)
+		cli := newClient(tc.addr)
 		assert.NotNil(t, cli)
 	}
 }
@@ -53,7 +63,7 @@ func TestVaultClient(t *testing.T) {
 	defer s.Close()
 
 	// Test authentication first
-	cli := NewVaultClient(s.URL)
+	cli := newClient(s.URL)
 	err := cli.Authenticate("xxxxxx", "yyyyyy")
 	assert.NoError(t, err)
 	assert.Equal(t, "123", cli.token)

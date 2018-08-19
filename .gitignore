@@ -3,6 +3,8 @@
 *.dll
 *.so
 *.dylib
+google.com
+test.cfg
 
 # Test binary, build with `go test -c`
 *.test

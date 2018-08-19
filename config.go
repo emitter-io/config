@@ -1,3 +1,6 @@
+// Copyright (c) Roman Atachiants and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+
 package config
 
 import (
@@ -5,6 +8,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -18,14 +22,8 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
-// SecretStore represents a contract for a store capable of resolving secrets.
-type SecretStore interface {
-	Configure(config Config) error
-	GetSecret(secretName string) (string, bool)
-}
-
-// CertificateStore represents a secret store which can be used for certificates.
-type CertificateStore interface {
+// CertificateCache represents a secret store which can be used for certificates.
+type CertificateCache interface {
 	autocert.Cache
 }
 
@@ -35,10 +33,19 @@ type Provider interface {
 	Configure(config map[string]interface{}) error
 }
 
-// Config represents a configuration interface.
-type Config interface {
-	Vault() *VaultConfig
+// SecretStore represents a contract for a store capable of resolving secrets.
+type SecretStore interface {
+	Provider
+	GetSecret(secretName string) (string, bool)
 }
+
+// CertCacher represents a contract which allows for retrieval of certificate cache
+type CertCacher interface {
+	GetCache() CertificateCache
+}
+
+// Config represents a configuration interface.
+type Config interface{}
 
 // TLSConfig represents TLS listener configuration.
 type TLSConfig struct {
@@ -112,23 +119,6 @@ func (c *TLSConfig) loadFromAutocert(certCache autocert.Cache) (*tls.Config, htt
 	return &tls.Config{
 		GetCertificate: certManager.GetCertificate,
 	}, certManager.HTTPHandler(nil), nil
-}
-
-// VaultConfig represents Vault configuration.
-type VaultConfig struct {
-	Address     string `json:"address"` // The vault address to use.
-	Application string `json:"app"`     // The vault application ID to use.
-}
-
-// NewClient creates a new vault client for the configuration.
-func (c *VaultConfig) NewClient(user string) (client *VaultClient, err error) {
-	if c.Address == "" || c.Application == "" {
-		return nil, errors.New("unable to configure Vault provider")
-	}
-
-	client = NewVaultClient(c.Address)
-	err = client.Authenticate(c.Application, user)
-	return
 }
 
 // ProviderConfig represents provider configuration.
@@ -271,12 +261,43 @@ func ReadOrCreate(prefix string, path string, newDefault func() Config, stores .
 
 	// Apply all the store overrides, in order
 	for _, store := range stores {
-		if err := store.Configure(cfg); err == nil {
-			declassify(cfg, prefix, store)
+		sc, err := getSecretStoreConfig(cfg, store.Name())
+		if err != nil {
+			return nil, err
 		}
+
+		if err := store.Configure(sc); err != nil {
+			return nil, err
+		}
+
+		declassify(cfg, prefix, store)
 	}
 
 	return cfg, nil
+}
+
+// Retrieves a secret store configuration from the config
+func getSecretStoreConfig(cfg Config, key string) (map[string]interface{}, error) {
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	var raw map[string]interface{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return nil, err
+	}
+
+	v, ok := raw[key]
+	if !ok {
+		return nil, nil
+	}
+
+	if casted, ok := v.(map[string]interface{}); ok {
+		return casted, nil
+	}
+
+	return nil, fmt.Errorf("unable to parse configuration for %v provider", key)
 }
 
 // Declassify traverses the configuration and resolves secrets.

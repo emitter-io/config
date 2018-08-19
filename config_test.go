@@ -1,7 +1,12 @@
+// Copyright (c) Roman Atachiants and contributors. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for details.
+
 package config
 
 import (
 	"bytes"
+	"errors"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,8 +20,9 @@ type testConfig struct {
 	unexported *ProviderConfig
 }
 
-func (c *testConfig) Vault() *VaultConfig {
-	return c.VaultCfg
+type VaultConfig struct {
+	Address     string `json:"address"` // The vault address to use.
+	Application string `json:"app"`     // The vault application ID to use.
 }
 
 type secretStoreMock struct {
@@ -29,8 +35,35 @@ func (m *secretStoreMock) GetSecret(secretName string) (string, bool) {
 	return v, v != ""
 }
 
-func (m *secretStoreMock) Configure(c Config) error {
+func (m *secretStoreMock) Name() string {
+	return "vault"
+}
+
+func (m *secretStoreMock) Configure(config map[string]interface{}) error {
+	if config["address"] == nil || config["address"] == "" {
+		return errors.New("address was not configured")
+	}
+
 	return nil
+}
+
+func TestReadOrCreate(t *testing.T) {
+	m := new(secretStoreMock)
+	m.On("GetSecret", "emitter/listen").Return(":999")
+	m.On("GetSecret", "emitter/vault/address").Return("hello")
+	m.On("GetSecret", mock.Anything).Return("")
+
+	defaultCfg := new(testConfig)
+	defaultCfg.Name = "test"
+	defaultCfg.VaultCfg = &VaultConfig{
+		Address: "test",
+	}
+
+	const f = "test.cfg"
+	cfg, err := ReadOrCreate("test", f, func() Config { return defaultCfg }, m)
+	assert.NoError(t, err)
+	assert.NotNil(t, cfg)
+	os.Remove(f)
 }
 
 func Test_write(t *testing.T) {
@@ -62,10 +95,6 @@ func Test_declassify(t *testing.T) {
 	declassify(c, "emitter", m)
 
 	assert.EqualValues(t, expected, c)
-
-	c.Vault().Application = "abc"
-	assert.True(t, c.Vault() != nil)
-	assert.True(t, c.Vault().Application == "abc")
 }
 
 func Test_declassify_Map(t *testing.T) {
