@@ -187,6 +187,12 @@ func ReadOrCreate(prefix string, path string, newDefault func() Config, stores .
 			return nil, err
 		}
 
+		// Skip empty configurations
+		if sc == nil {
+			continue
+		}
+
+		// Configure the store
 		if err := store.Configure(sc); err != nil {
 			return nil, err
 		}
