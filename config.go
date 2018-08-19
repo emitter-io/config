@@ -16,6 +16,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"golang.org/x/crypto/acme/autocert"
 )
 
 // Provider represents a configurable provider.
@@ -24,10 +26,17 @@ type Provider interface {
 	Configure(config map[string]interface{}) error
 }
 
-// SecretStore represents a contract for a store capable of resolving secrets.
-type SecretStore interface {
+// SecretReader represents a contract for a store capable of resolving secrets.
+type SecretReader interface {
 	Provider
 	GetSecret(secretName string) (string, bool)
+}
+
+// SecretStore represents a contract for a store capable of resolving secrets. On top
+// of that, also capable of caching certificates.
+type SecretStore interface {
+	SecretReader
+	GetCache() (autocert.Cache, bool)
 }
 
 // Config represents a configuration interface.
@@ -151,7 +160,7 @@ func createDefault(path string, newDefault func() Config) (Config, error) {
 }
 
 // ReadOrCreate reads or creates the configuration object.
-func ReadOrCreate(prefix string, path string, newDefault func() Config, stores ...SecretStore) (cfg Config, err error) {
+func ReadOrCreate(prefix string, path string, newDefault func() Config, stores ...SecretReader) (cfg Config, err error) {
 	cfg = newDefault()
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		// Create a configuration and write it to a file
@@ -173,7 +182,7 @@ func ReadOrCreate(prefix string, path string, newDefault func() Config, stores .
 
 	// Apply all the store overrides, in order
 	for _, store := range stores {
-		sc, err := getSecretStoreConfig(cfg, store.Name())
+		sc, err := getSecretReaderConfig(cfg, store.Name())
 		if err != nil {
 			return nil, err
 		}
@@ -189,7 +198,7 @@ func ReadOrCreate(prefix string, path string, newDefault func() Config, stores .
 }
 
 // Retrieves a secret store configuration from the config
-func getSecretStoreConfig(cfg Config, key string) (map[string]interface{}, error) {
+func getSecretReaderConfig(cfg Config, key string) (map[string]interface{}, error) {
 	b, err := json.Marshal(cfg)
 	if err != nil {
 		return nil, err
@@ -213,13 +222,13 @@ func getSecretStoreConfig(cfg Config, key string) (map[string]interface{}, error
 }
 
 // Declassify traverses the configuration and resolves secrets.
-func declassify(config interface{}, prefix string, provider SecretStore) {
+func declassify(config interface{}, prefix string, provider SecretReader) {
 	original := reflect.ValueOf(config)
 	declassifyRecursive(prefix, provider, original)
 }
 
 // DeclassifyRecursive traverses the configuration and resolves secrets.
-func declassifyRecursive(prefix string, provider SecretStore, value reflect.Value) {
+func declassifyRecursive(prefix string, provider SecretReader, value reflect.Value) {
 	switch value.Kind() {
 	case reflect.Ptr:
 		pValue := value.Elem()
