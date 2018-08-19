@@ -59,6 +59,10 @@ func (p *Provider) GetSecret(secretName string) (string, bool) {
 }
 
 // GetCache returns a certificate cache which can use the secrets store to read/write x509 certs.
-func (p *Provider) GetCache() autocert.Cache {
-	return newCache(p.client)
+func (p *Provider) GetCache() (autocert.Cache, bool) {
+	if p.client != nil && p.client.IsAuthenticated() {
+		return newCache(p.client), true
+	}
+
+	return nil, false
 }

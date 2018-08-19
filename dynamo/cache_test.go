@@ -31,7 +31,7 @@ func TestCertCache(t *testing.T) {
 		valColumn: "v",
 	}
 
-	cache := provider.GetCache()
+	cache, _ := provider.GetCache()
 	assert.NotNil(t, cache)
 
 	{

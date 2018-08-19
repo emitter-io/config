@@ -25,7 +25,7 @@ func TestCertCache(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
-	cache := provider.GetCache()
+	cache, _ := provider.GetCache()
 	assert.NotNil(t, cache)
 
 	{
