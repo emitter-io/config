@@ -44,6 +44,8 @@ func TLS(cfg *TLSConfig, stores ...CertCacher) (*tls.Config, http.Handler, CertC
 		if cache, valid := store.GetCache(); valid {
 			if tls, val, err := cfg.Load(cache); err == nil {
 				return tls, val, store
+			} else {
+				panic(err)
 			}
 		}
 	}

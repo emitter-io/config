@@ -6,6 +6,11 @@
 google.com
 test.cfg
 
+# Keys
+*.crt
+*.key
+*.pem
+
 # Test binary, build with `go test -c`
 *.test
 

@@ -2,3 +2,70 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 
 package config
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestTLS_Local(t *testing.T) {
+	cfg := TLSConfig{
+		ListenAddr:  ":443",
+		Certificate: testCert,
+		PrivateKey:  testKey,
+	}
+
+	tls, handler, cacher := TLS(&cfg)
+	assert.NotNil(t, tls)
+	assert.Nil(t, handler)
+	assert.NotNil(t, cacher)
+}
+
+const testCert = `-----BEGIN CERTIFICATE-----
+MIIC+zCCAeOgAwIBAgIJAOfO2qzAuZFFMA0GCSqGSIb3DQEBCwUAMBQxEjAQBgNV
+BAMMCWxvY2FsaG9zdDAeFw0xODExMTAwNjQ2MzFaFw0xOTExMTAwNjQ2MzFaMBQx
+EjAQBgNVBAMMCWxvY2FsaG9zdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC
+ggEBAO/F2I7wUp1exS9kZ77PQJgGDH53uJofi9ADlu9mZ7ui6BITVF7LLtNVbInx
+Q0y8Bhe0pW6xC5GpYg6UyG9ctFfB1UilG+/IggvH7BrsJcPelHVtfLPw2dXRhi7V
+fDO16x4+XY/wKIGEma7qVHaeg30cTI8K1/6/KnWGuxxsypZj3119H4vG36iTlpAE
+AVLrcuB5jFS9xQ4eVeq0ya16h1zjWwb6YYqLB1dTq2YbKq2iuOUfswoQIr52fhyz
+pupub95QG9B8Ce5b4nPZLAYHrjJRtSgIe4Cm+B87EnCx6lYw4vBs4dUNb6wCjKpD
+yrRbpOsKjUDTWDIO+FLf5InPWS0CAwEAAaNQME4wHQYDVR0OBBYEFJ93b01makOe
+Eco9s5oYHrqGEruIMB8GA1UdIwQYMBaAFJ93b01makOeEco9s5oYHrqGEruIMAwG
+A1UdEwQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBANt+DuYq5XjoKaqg+J5acUIC
+g8eQ2jZiTjnDAXwzeTr4Cu7nWkCL3p6XvOyElrAkqBM6HSkcvmbZiIKqfy9oZIRl
+PJVvHfgcjPgoahLOzw5uz+7yneoai/xWTvQOqd1UqpaTMo+BPY2aQuRW9yzYl4aH
+d+6NxLPKTdeODRFqOQnfDq2zFMK7wFcVjnKMKFsy3TuOl0nYd7sV2cfd+TQcmK09
+47LMsEg2nHlVt+RTi4klkfHT0m+oIuyO/5xWXBwhSMZeWcYXwFMl+HaeP9KhjsaT
+T2bxGHj6/8+2K3Ox91R9Sp6M3ntaX/5loP/ECWeTSkBtDPe/IomIMHAtShDqBuo=
+-----END CERTIFICATE----- `
+
+const testKey = `-----BEGIN PRIVATE KEY-----
+MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDvxdiO8FKdXsUv
+ZGe+z0CYBgx+d7iaH4vQA5bvZme7ougSE1Reyy7TVWyJ8UNMvAYXtKVusQuRqWIO
+lMhvXLRXwdVIpRvvyIILx+wa7CXD3pR1bXyz8NnV0YYu1XwztesePl2P8CiBhJmu
+6lR2noN9HEyPCtf+vyp1hrscbMqWY99dfR+Lxt+ok5aQBAFS63LgeYxUvcUOHlXq
+tMmteodc41sG+mGKiwdXU6tmGyqtorjlH7MKECK+dn4cs6bqbm/eUBvQfAnuW+Jz
+2SwGB64yUbUoCHuApvgfOxJwsepWMOLwbOHVDW+sAoyqQ8q0W6TrCo1A01gyDvhS
+3+SJz1ktAgMBAAECggEAONfttE1zOI3ML6UdF1ZpGOFuOtlFMXzDF6iSMuVTOF+x
+pv9gJC0FR+LbnYROETYON7aC9dARTxIaBhztu8D9nER+vP8vtVQSyJo39lX/ygTN
+q10ukDZMXm2S4y2HiXbaa8wbQFGOOM5n5Nj29zwzLgj0eYD3nhRSC5TKbT25dZd4
+VfqBE5QqQRliuPlEyn5ToB3ZM1MRaBBF34I2GBu7ndA4pA5ymrXHM8K2vvpzRHid
+a1S9nWjc1oNbIE/i2qK+Aei7r9DoMOIAFndIJpRmY3chf+/RTaGoW0o4Lu5A0u2v
+ujoSAmxxIlc0QzCgQN0Rh8U7rlUykflxrheorGNQ4QKBgQD5pUU0O0/Hbw8hS/6K
+RRJa2qSNBsmmwLAhYOj5MJ+99wJ7e3y1uBMCrkR21i4mEoiGkavMkhsFiBzuE5Um
+PYLbjf/BcPNkQrxRWtOl21kOL7nH1BzvyspZGuzJTGKThdV0KK0YZloCD6cCe2s+
+mISvn7uMM2FwaK/GQcaKYH7TmQKBgQD14D5DCRE4qcNnAeI1ZeGxWTrRlBt8Yf+y
+Rrv0K9MYuYimIpkgioqSkPBRx9hJP99LOStrc0lji6ncKfULVem09cL9HzcNzqZb
+EAkfUiKOakX9D+HWQrCLwZ1d1Y9jctfJ7mxtRQHVAZoXnQL3vlyLqgExd++9hVKM
+DeFmnfhutQKBgApaflpCM3bT9k6tNitJ3g8CjlyC8Y4G48cem8rp51YbjnDMmEl5
+DuDHlXNQQq21iw/5rqRXUuOR15FQIplpZ6nvY7IEGzQHSIQfPjPcuv7Jn+zXsTOI
+t4emhDd9AYGYxVeB8FvYstbvC0AhGjuIW8hk2YRhBSOCU/fm9nL6uYfRAoGAVgIM
+JYztbkHMLaM2CvHJoi0RazCA8OCi/izKIJ6X6EU2bM8be4ua76wttJ3QpcbnCDxG
+WP7qBB1d3Lr8keuKphd2Du81ZeoMvTv9xOwJVIIOW3iLylRnx2uB7cn/r40DuQpi
++VIzUtyNl4b/+8OmQeDFLBXFUilp973/Q9MsjSUCgYAK9u9+Y6fZPNu3FAGVU0TK
+vvUKlZqclL4ugNclcbCxHZMyHsSZKkY7SdKMy69sDgqj+Bl+1t2xZRb+Gkl8ND1D
+K9/l77IIH1+OLwRjCS+1yt/Wu0zL+RWGGzQBZcozj+pDl72rqhQ8CRqXVKLwcS0y
+g3ww1TB+y6wlFQFHIOrzkg==
+-----END PRIVATE KEY----- `
