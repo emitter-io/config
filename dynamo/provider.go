@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
-// Provider represents a security provider which uses hashicorp vault to store secrets.
+// Provider represents a security provider which uses AWS DynamoDB to store secrets.
 type Provider struct {
 	client *client
 }
